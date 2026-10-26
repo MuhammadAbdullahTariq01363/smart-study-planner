@@ -4,12 +4,12 @@
 
 **Turn your syllabus and exam date into an adaptive study plan, ask questions from your own notes, and track exam readiness — all in one place.**
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/MuhammadAbdullahTariq01363/smart-study-planner)
-
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)
 ![Gemini](https://img.shields.io/badge/Gemini-AI-4285F4?logo=google&logoColor=white)
+
+[Project Page](https://muhammadabdullahtariq01363.github.io/smart-study-planner/) · [Source Code](https://github.com/MuhammadAbdullahTariq01363/smart-study-planner)
 
 </div>
 
@@ -40,63 +40,71 @@
 
 ---
 
-## ☁️ Deploy (Render)
+## 🚀 Getting Started
 
-The FastAPI backend serves both the API and the web UI, so a **single Render service** runs the whole app.
+The FastAPI backend serves both the API and the web UI, so you only need to start one server.
 
-1. Click the **Deploy to Render** button above (or in Render: **New → Blueprint** and select this repo).
-2. When asked, paste your **`GEMINI_API_KEY`** ([get one free from Google AI Studio](https://aistudio.google.com/app/apikey)).
-3. Click **Apply**. After the build finishes, your app is live at the `onrender.com` URL shown on the dashboard.
+### Requirements
 
-`render.yaml` already configures the build, start command, health check and a generated `SECRET_KEY`.
+- Python 3.10, 3.11 or 3.12
+- A free [Gemini API key](https://aistudio.google.com/app/apikey) for the AI tutor and quizzes
+- Node.js 18/20 — only if you want to edit the React frontend
 
-> **Free-tier notes**
-> - The service sleeps after ~15 min of inactivity, so the first request can take 30–60 s to wake up.
-> - SQLite on the free plan lives on temporary disk and **resets on every redeploy/restart**. For permanent data, create a free Render PostgreSQL database and set its connection string as `DATABASE_URL`.
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/MuhammadAbdullahTariq01363/smart-study-planner.git
+cd smart-study-planner/backend
+```
+
+### 2. Set up the backend
+
+```bash
+# Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate          # Windows: .\venv\Scripts\Activate.ps1
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Add your API key
+cp .env.example .env              # Windows: copy .env.example .env
+# then open .env and set GEMINI_API_KEY=your_key_here
+```
+
+### 3. Run the app
+
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+- App: **http://localhost:8000**
+- Interactive API docs (Swagger): **http://localhost:8000/docs**
+
+> 💡 On Windows you can also double-click **`START_APP.bat`** from the project root.
+
+### Developing the frontend (optional)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The Vite dev server runs at **http://localhost:5173** and talks to the API on port 8000.
 
 ---
 
 ## 🔑 Environment Variables
 
+Set these in `backend/.env` (never commit this file — it is git-ignored).
+
 | Variable | Required | Description |
 | :--- | :-: | :--- |
 | `GEMINI_API_KEY` | ✅ | Google Gemini API key (powers the tutor and quizzes) |
-| `LLM_PROVIDER` | | `gemini` (default on Render), `claude`, `openai` or `mock` |
-| `SECRET_KEY` | | Secret used to sign JWTs (auto-generated on Render) |
+| `LLM_PROVIDER` | | `gemini`, `claude`, `openai` or `mock` (no key needed, demo answers only) |
+| `SECRET_KEY` | | Secret used to sign JWTs — set your own for any shared setup |
 | `DATABASE_URL` | | Defaults to `sqlite:///./smart_study.db` |
-
-Never commit your real keys — `.env` is git-ignored. Use `backend/.env.example` as a template.
-
----
-
-## 💻 Run Locally (optional)
-
-**Requirements:** Python 3.10–3.12 and Node.js 18/20 (Node is only needed if you want to edit the frontend).
-
-```bash
-# 1) Backend
-cd backend
-python -m venv venv
-source venv/bin/activate        # Windows: .\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-cp .env.example .env            # then add your GEMINI_API_KEY
-uvicorn app.main:app --reload --port 8000
-```
-
-Open **http://localhost:8000** for the app and **http://localhost:8000/docs** for the interactive API docs.
-
-On Windows you can also just double-click `START_APP.bat`.
-
-<details>
-<summary>Developing the React frontend (hot reload)</summary>
-
-```bash
-cd frontend
-npm install
-npm run dev        # http://localhost:5173 (talks to the API on :8000)
-```
-
-</details>
 
 ---
 
@@ -116,7 +124,7 @@ smart-study-planner/
 │   ├── Dockerfile
 │   └── .env.example
 ├── frontend/            # React + Vite source
-├── render.yaml          # One-click Render deployment
+├── render.yaml          # Render deployment config (for future hosting)
 └── README.md
 ```
 
@@ -125,3 +133,10 @@ smart-study-planner/
 ## 🩺 Health Check
 
 `GET /api/health` returns the service status and whether the AI is running in live or mock mode.
+
+---
+
+## 📌 Notes
+
+- The project page above is GitHub Pages showing this README only — the app itself (login, planner, AI tutor) needs the Python backend, so run it locally as described.
+- Cloud hosting is not set up yet; `render.yaml` is included so the app can be deployed later.
