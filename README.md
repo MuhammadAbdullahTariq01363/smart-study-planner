@@ -9,7 +9,7 @@
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)
 ![Gemini](https://img.shields.io/badge/Gemini-AI-4285F4?logo=google&logoColor=white)
 
-[Project Page](https://muhammadabdullahtariq01363.github.io/smart-study-planner/) · [Source Code](https://github.com/MuhammadAbdullahTariq01363/smart-study-planner)
+[Source Code](https://github.com/MuhammadAbdullahTariq01363/smart-study-planner)
 
 </div>
 
@@ -138,5 +138,5 @@ smart-study-planner/
 
 ## 📌 Notes
 
-- The project page above is GitHub Pages showing this README only — the app itself (login, planner, AI tutor) needs the Python backend, so run it locally as described.
+- The app (login, planner, AI tutor) needs the Python backend, so run it locally as described above.
 - Cloud hosting is not set up yet; `render.yaml` is included so the app can be deployed later.
