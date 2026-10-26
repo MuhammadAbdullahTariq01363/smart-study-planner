@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Study Planner + AI Tutor Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col antialiased">
+
+  <!-- ================= VIEW 1: FULL-PAGE STANDALONE AUTH PORTAL ================= -->
+  <div id="authView" class="min-h-screen bg-slate-100 flex flex-col justify-between py-8 px-4">
+    <!-- Top Portal Bar -->
+    <div class="max-w-4xl w-full mx-auto flex items-center justify-between text-xs text-slate-500 pb-4">
+      <div class="flex items-center space-x-2 font-semibold text-slate-700">
+        <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+        <span>Student Learning & Revision Portal</span>
+      </div>
+      <div>Session: 2026-2027</div>
+    </div>
+
+    <!-- Center Card -->
+    <div class="max-w-md w-full mx-auto bg-white rounded-3xl shadow-xl border border-slate-200/80 p-8 my-auto space-y-6">
+      <!-- Portal Logo / Header -->
+      <div class="text-center space-y-3">
+        <div class="w-16 h-16 bg-gradient-to-tr from-indigo-700 to-indigo-500 text-white rounded-2xl flex items-center justify-center mx-auto shadow-md shadow-indigo-200 text-3xl">
+          🎓
+        </div>
+        <div>
+          <h2 id="authPortalTitle" class="text-2xl font-black text-slate-800 tracking-tight">Login to Study Portal</h2>
+          <p id="authPortalSubtitle" class="text-xs text-slate-500 mt-1">Enter your student credentials to access your study planner</p>
+        </div>
+      </div>
+
+      <div id="authPortalAlert" class="hidden p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl font-medium"></div>
+
+      <!-- Auth Form -->
+      <form id="authPortalForm" autocomplete="off" onsubmit="handlePortalAuthSubmit(event)" class="space-y-4">
+        <div id="portalNameField" class="hidden">
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1 tracking-wider">Full Name</label>
+          <input type="text" id="portalName" name="sp_name_field" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1 tracking-wider">Email Address / Student ID</label>
+          <input type="email" id="portalEmail" name="sp_email_field" required autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1 tracking-wider">Password</label>
+          <input type="password" id="portalPassword" name="sp_pass_field" required autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <button type="submit" id="portalAuthBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md shadow-indigo-100 transition-colors">
+          Log In to Portal →
+        </button>
+      </form>
+
+      <div class="text-center pt-3 border-t border-slate-100">
+        <button type="button" onclick="togglePortalMode()" id="portalToggleBtn" class="text-xs text-indigo-600 font-semibold hover:underline">
+          Don't have an account? <span class="font-bold">Register Here !</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Portal Footer -->
+    <div class="max-w-4xl w-full mx-auto text-center text-xs text-slate-400 pt-6">
+      Smart Study Planner + Grounded AI Tutor MVP · Automated Revision & Mastery System
+    </div>
+  </div>
+
+
+  <!-- ================= VIEW 2: FULL APPLICATION DASHBOARD ================= -->
+  <div id="appView" class="hidden min-h-screen bg-slate-50 flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100 text-xl font-bold">
+          🎓
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-800 text-base leading-tight">Smart Study Planner</h1>
+          <p class="text-xs text-indigo-600 font-semibold tracking-wide">+ Grounded AI Tutor</p>
+        </div>
+      </div>
+
+      <!-- Center active subject badge -->
+      <div class="flex items-center space-x-2 bg-indigo-50 border border-indigo-100 px-4 py-1.5 rounded-full text-xs font-semibold text-indigo-800">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Subject:</span>
+        <select id="subjectSelect" onchange="onSubjectChange()" class="bg-white border border-indigo-200 rounded-lg px-2 py-1 text-xs font-bold text-indigo-900 focus:outline-none max-w-[12rem]"><option value="">— none yet —</option></select>
+        <span>(Exam: <span id="headerExamDate">—</span>)</span>
+        <button id="deleteSubjectBtn" onclick="handleDeleteSubject()" class="hidden text-slate-400 hover:text-rose-600" title="Delete this subject">🗑</button>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button onclick="document.getElementById('subjectModal').classList.remove('hidden')" class="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg border border-indigo-200 transition-colors">
+          + New Subject
+        </button>
+
+        <a href="/docs" target="_blank" class="text-xs font-semibold text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-slate-200 py-1.5 px-3 rounded-lg transition-colors border border-slate-200">
+          API Docs ↗
+        </a>
+
+        <!-- User Profile & Prominent Logout Button -->
+        <div class="flex items-center space-x-3 border-l pl-3 border-slate-200">
+          <div class="text-right">
+            <div class="font-bold text-slate-800 text-xs" id="headerUserName">Muhammad Abdullah Tariq</div>
+            <div class="text-[10px] text-slate-400">Student Profile</div>
+          </div>
+          <button onclick="handlePortalLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition-all shadow-sm">
+            <span>🚪 Log Out</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main App Layout with Sidebar -->
+    <div class="flex-1 flex max-w-7xl w-full mx-auto">
+      <!-- Sidebar Navigation -->
+      <aside class="w-64 bg-white border-r border-slate-200 p-4 flex flex-col justify-between">
+        <nav class="space-y-1.5">
+          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all bg-indigo-50 text-indigo-700 font-semibold shadow-sm">
+            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            <span>Dashboard</span>
+          </button>
+
+          <button onclick="switchTab('syllabus')" id="nav-syllabus" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <span>Syllabus & Topics</span>
+          </button>
+
+          <button onclick="switchTab('planner')" id="nav-planner" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Study Planner</span>
+          </button>
+
+          <button onclick="switchTab('notes')" id="nav-notes" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <span>Upload Notes (RAG)</span>
+          </button>
+
+          <button onclick="switchTab('tutor')" id="nav-tutor" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+            <span>AI Tutor Chat</span>
+          </button>
+
+          <button onclick="switchTab('quiz')" id="nav-quiz" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+            <span>Topic Quizzes</span>
+          </button>
+        </nav>
+
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100">
+          <h4 class="font-bold text-[11px] text-indigo-900 uppercase tracking-wider mb-1">
+            Exam Ready System
+          </h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Automatic day-wise schedule, RAG notes grounding, and weak topic auto-detection.
+          </p>
+        </div>
+      </aside>
+
+      <!-- Main Content Tabs -->
+      <main class="flex-1 p-8 overflow-y-auto">
+
+        <!-- ================= TAB 1: DASHBOARD ================= -->
+        <section id="tab-dashboard" class="tab-content active space-y-6">
+          <div class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 rounded-3xl p-8 text-white shadow-lg">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white backdrop-blur-md mb-3">
+              ✨ Exam Readiness Dashboard
+            </span>
+            <h2 class="text-3xl font-black" id="dashSubjectTitle">No subject yet</h2>
+            <p class="text-indigo-100 text-sm mt-2 max-w-xl">
+              Target exam date is <strong id="dashExamDate">—</strong>. Days left: <strong id="dashDaysLeft">—</strong>. Weak topics (&lt; 60% mastery) are allocated 30-40% extra revision time in your study schedule.
+            </p>
+          </div>
+
+          <!-- KPI Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-blue-50 text-blue-600 rounded-xl font-bold">⏱️</div>
+              <div>
+                <div class="text-2xl font-black text-slate-800" id="kpiDays">—</div>
+                <div class="text-xs font-semibold text-slate-400 uppercase">Days Left Until Exam</div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl font-bold">🎯</div>
+              <div>
+                <div class="text-2xl font-black text-slate-800" id="kpiCoverage">0%</div>
+                <div class="text-xs font-semibold text-slate-400 uppercase">Syllabus Coverage</div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-purple-50 text-purple-600 rounded-xl font-bold">⭐</div>
+              <div>
+                <div class="text-2xl font-black text-slate-800" id="kpiMastery">0%</div>
+                <div class="text-xs font-semibold text-slate-400 uppercase">Avg Mastery Score</div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-amber-50 text-amber-500 rounded-xl font-bold">🔥</div>
+              <div>
+                <div class="text-2xl font-black text-slate-800" id="kpiStreak">1 Day</div>
+                <div class="text-xs font-semibold text-slate-400 uppercase">Active Study Streak</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Schedule & Weak Topics Alert -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-bold text-slate-800 text-base">Today's Study Schedule</h3>
+                  <p class="text-xs text-slate-400">Algorithmic slots calculated from your available hours</p>
+                </div>
+                <button onclick="switchTab('planner')" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1">
+                  <span>View full weekly plan</span> →
+                </button>
+              </div>
+
+              <div class="space-y-3" id="dashSessions">
+                <div class="p-6 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">
+                  No study sessions yet for this subject. Add topics in the Syllabus tab, then generate your schedule.
+                </div>
+              </div>
+            </div>
+
+            <!-- Weak Topics Widget -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center space-x-2 text-rose-600 mb-2">
+                  <h3 class="font-bold text-slate-800 text-base">⚠️ Weak Topics (< 60% Mastery)</h3>
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                  Topics with mastery &lt; 0.6 receive prioritized study slots until mastery improves.
+                </p>
+
+                <div class="space-y-3" id="dashWeakList">
+                  <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
+                    No weak topics detected yet. Add topics and take quizzes to update mastery.
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="switchTab('quiz')" class="w-full mt-6 py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-xl shadow-md transition-colors flex items-center justify-center space-x-2">
+                <span>Start Topic Quiz</span> →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 2: SYLLABUS ================= -->
+        <section id="tab-syllabus" class="tab-content space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-slate-800">Syllabus Topics & Effort Breakdown</h2>
+              <p class="text-xs text-slate-500 mt-1">Configure difficulty (1-5), weightage, and estimated hours to calibrate the study scheduler.</p>
+            </div>
+            <button onclick="openTopicModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm transition-colors">
+              + Add New Topic
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase">
+                  <th class="py-3.5 px-6">Topic Title</th>
+                  <th class="py-3.5 px-4">Difficulty</th>
+                  <th class="py-3.5 px-4">Est. Hours</th>
+                  <th class="py-3.5 px-4">Weightage</th>
+                  <th class="py-3.5 px-4">Priority Formula</th>
+                  <th class="py-3.5 px-4">Mastery</th>
+                  <th class="py-3.5 px-4">Status</th>
+                  <th class="py-3.5 px-4"></th>
+                </tr>
+              </thead>
+              <tbody id="syllabusTableBody" class="divide-y divide-slate-100">
+                <tr>
+                  <td colspan="7" class="py-8 text-center text-slate-400 text-xs">
+                    No syllabus topics added yet. Create a subject first with <strong>+ New Subject</strong>.<br>
+                    <button onclick="openTopicModal()" class="mt-2 text-indigo-600 font-bold hover:underline">+ Click here to add your first topic</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= TAB 3: PLANNER ================= -->
+        <section id="tab-planner" class="tab-content space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-slate-800">Weekly Study Schedule</h2>
+              <p class="text-xs text-slate-500 mt-1">Generated by backend scheduler. Formula: priority = difficulty * (1 - mastery) * weightage. 20% reserved for revision.</p>
+            </div>
+            <button onclick="handleRegeneratePlan()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm transition-colors">
+              ↻ Regenerate Schedule
+            </button>
+          </div>
+
+          <div id="planRationale" class="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl text-xs text-indigo-900 leading-relaxed">
+            <strong>Study Plan: </strong> Add topics in the Syllabus tab first, then click Regenerate Schedule to automatically calculate day-wise slots.
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-3" id="plannerSessionList">
+            <div class="p-8 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">
+              No sessions scheduled yet. Click <strong>'↻ Regenerate Schedule'</strong> once you have added topics.
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 4: NOTES (RAG) ================= -->
+        <section id="tab-notes" class="tab-content space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800">Notes Upload & Vector Ingestion</h2>
+            <p class="text-xs text-slate-500 mt-1">Upload PDF, DOCX, or TXT lecture notes. Text is extracted, split into 500-800 token chunks with 100 token overlap, and embedded for grounded RAG Q&A.</p>
+          </div>
+
+          <div class="bg-white border-2 border-dashed border-slate-300 rounded-3xl p-8 text-center hover:border-indigo-400 transition-colors max-w-lg mx-auto">
+            <div class="text-3xl mb-2">📄</div>
+            <h4 class="font-bold text-slate-800 text-sm">Select Lecture Notes or Slides</h4>
+            <p class="text-xs text-slate-400 mt-1 mb-4">Supported formats: PDF, DOCX, TXT</p>
+            <input type="file" id="noteFileInput" accept=".pdf,.docx,.txt" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 mb-3">
+            <button id="uploadBtn" onclick="handleUploadNote()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold text-xs shadow-sm transition-colors">
+              Upload & Index into Vector Store
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h3 class="font-bold text-slate-800 text-base mb-4">Indexed Documents (<span id="notesCount">0</span>)</h3>
+            <div class="space-y-3" id="notesList">
+              <div class="p-6 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">No notes uploaded yet.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 5: AI TUTOR ================= -->
+        <section id="tab-tutor" class="tab-content">
+          <div class="flex flex-col h-[calc(100vh-10rem)] bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+              <div>
+                <h3 class="font-bold text-slate-800 text-sm">Grounded AI Tutor (RAG)</h3>
+                <p class="text-xs text-slate-500">Retrieves top matching chunks from uploaded notes and includes source citations.</p>
+              </div>
+              <span id="aiBadge" onclick="checkAiStatus()" class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold border border-slate-200 cursor-pointer">● AI status</span>
+            </div>
+
+            <!-- Chat messages -->
+            <div id="tutorMessages" class="flex-1 p-6 overflow-y-auto space-y-4">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">AI</div>
+                <div class="bg-slate-100 text-slate-800 p-4 rounded-2xl rounded-bl-none text-sm max-w-xl">
+                  Hello! I am your AI Tutor for <strong>your subject</strong>. Ask any question about your syllabus concepts, and I will explain it using your lecture notes with document citations.
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Input -->
+            <form onsubmit="handleSendTutor(event)" class="p-4 border-t border-slate-200 bg-white flex items-center space-x-3">
+              <input type="text" id="tutorInput" placeholder="Ask about core concepts, mechanisms, laws..." class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-2xl font-semibold text-xs transition-colors">
+                Ask Tutor
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <!-- ================= TAB 6: QUIZ ================= -->
+        <section id="tab-quiz" class="tab-content space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800">Targeted Topic Quizzes</h2>
+            <p class="text-xs text-slate-500 mt-1">Questions are generated from your uploaded notes for the chosen topic. Submissions update mastery via exponential moving average: mastery_new = 0.7 * mastery_old + 0.3 * quiz_accuracy.</p>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
+            <div class="flex flex-wrap items-center gap-3">
+              <select id="quizTopic" class="flex-1 min-w-[14rem] px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+              <button id="genQuizBtn" onclick="handleGenerateQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold text-xs shadow-sm">Generate Quiz</button>
+              <span id="aiBadgeQuiz" onclick="checkAiStatus()" class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold border border-slate-200 cursor-pointer">● AI status</span>
+            </div>
+            <div id="quizArea"></div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Create Subject Modal (Inside App) -->
+    <div id="subjectModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 space-y-5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-black text-slate-800">Add New Subject</h3>
+          <button onclick="document.getElementById('subjectModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleCreateSubject(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Subject Name</label>
+            <input type="text" id="subjName" required placeholder="e.g. Physics / Machine Learning / Chemistry" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Target Exam Date</label>
+            <input type="date" id="subjExamDate" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Daily Study Availability (Hours/Day)</label>
+            <input type="number" id="subjDailyHours" step="0.5" min="0.5" max="12" value="3.0" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md transition-colors">
+            Save Subject & Go to Syllabus →
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Add Topic Modal -->
+  <div id="topicModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 space-y-5">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-black text-slate-800">Add Syllabus Topic</h3>
+        <button type="button" onclick="document.getElementById('topicModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+      </div>
+      <form id="topicForm" onsubmit="handleAddTopic(event)" class="space-y-4" autocomplete="off">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Topic Title</label>
+          <input type="text" id="topicTitle" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Difficulty</label>
+            <select id="topicDifficulty" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Hours</label>
+            <input type="number" id="topicHours" step="0.5" min="0.5" max="40" value="2" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Weightage</label>
+            <input type="number" id="topicWeight" step="0.1" min="0.1" max="5" value="1" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400">Difficulty 1 (easy) – 5 (hard). Weightage = how much this topic counts in the exam (1.0 = normal).</p>
+        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md">Add Topic</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="toastBox" class="fixed bottom-5 right-5 z-50 space-y-2"></div>
+
+  <script>
+    const API = '/api/v1';
+    let isRegisterPortalMode = false;
+    let subjects = [], current = null, topics = [], notes = [], plan = null, progress = null;
+    let currentQuiz = null, aiStatusChecked = false;
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const setText = (id, v) => { $(id).innerText = v; };
+    const pct = v => Math.round((v || 0) * 100) + '%';
+    const localDate = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    // minimal formatting for AI answers: escape, then **bold**
+    const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+    // ---------- small helpers ----------
+    function toast(msg, kind = 'ok') {
+      const t = document.createElement('div');
+      const color = kind === 'error' ? 'bg-rose-600' : kind === 'warn' ? 'bg-amber-500' : 'bg-emerald-600';
+      t.className = `${color} text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg max-w-sm`;
+      t.textContent = msg;
+      $('toastBox').appendChild(t);
+      setTimeout(() => t.remove(), kind === 'error' ? 7000 : 4000);
+    }
+
+    function clearSession() {
+      localStorage.removeItem('study_user');
+      localStorage.removeItem('study_token');
+    }
+
+    async function api(path, opts = {}) {
+      const headers = {};
+      const token = localStorage.getItem('study_token');
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      let body = opts.body;
+      if (opts.json !== undefined) { headers['Content-Type'] = 'application/json'; body = JSON.stringify(opts.json); }
+      const res = await fetch(API + path, { method: opts.method || 'GET', headers, body });
+      if (res.status === 401 && !opts.noRedirect) { clearSession(); window.location.replace('/'); throw new Error('Session expired'); }
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+      if (!res.ok) {
+        let msg = `Request failed (${res.status})`;
+        if (data && typeof data.detail === 'string') msg = data.detail;
+        else if (data && Array.isArray(data.detail)) msg = 'Please check the values you entered.';
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    function userId() {
+      try { const u = JSON.parse(localStorage.getItem('study_user') || 'null'); return u ? (u.id || u.email) : ''; } catch (e) { return ''; }
+    }
+    const selKey = () => 'study_selected_subject_' + userId();
+
+    // ---------- session / auth ----------
+    window.addEventListener('DOMContentLoaded', async () => {
+      let u = null;
+      try {
+        if (localStorage.getItem('study_token')) u = JSON.parse(localStorage.getItem('study_user') || 'null');
+      } catch (e) { u = null; }
+      if (!u) { clearSession(); showAuthView(); return; }
+      try {
+        const me = await api('/auth/me', { noRedirect: true });   // make sure the token is still valid
+        localStorage.setItem('study_user', JSON.stringify(me));
+        $('headerUserName').innerText = me.name || me.email;
+        showAppView();
+      } catch (e) {
+        clearSession();
+        showAuthView();
+      }
+    });
+
+    function showAuthView() {
+      $('authView').classList.remove('hidden');
+      $('appView').classList.add('hidden');
+    }
+
+    function showAppView() {
+      $('authView').classList.add('hidden');
+      $('appView').classList.remove('hidden');
+      $('subjExamDate').min = localDate();
+      switchTab('dashboard');
+      loadSubjects().catch(e => toast(e.message, 'error'));
+    }
+
+    function togglePortalMode() {
+      isRegisterPortalMode = !isRegisterPortalMode;
+      $('authPortalAlert').classList.add('hidden');
+      $('authPortalForm').reset();
+      $('authPortalTitle').innerText = isRegisterPortalMode ? 'Student Registration' : 'Login to Study Portal';
+      $('authPortalSubtitle').innerText = isRegisterPortalMode
+        ? 'Create your student profile to begin personalized exam planning'
+        : 'Enter your student credentials to access your study planner';
+      $('portalAuthBtn').innerText = isRegisterPortalMode ? 'Register & Continue →' : 'Log In to Portal →';
+      $('portalNameField').style.display = isRegisterPortalMode ? 'block' : 'none';
+      $('portalToggleBtn').innerHTML = isRegisterPortalMode
+        ? 'Already have an account? <span class="font-bold">Log in here</span>'
+        : "Don't have an account? <span class=\"font-bold\">Register Here !</span>";
+    }
+
+    function showAuthError(msg) {
+      const box = $('authPortalAlert');
+      box.innerText = msg;
+      box.classList.remove('hidden');
+    }
+
+    async function handlePortalAuthSubmit(e) {
+      e.preventDefault();
+      $('authPortalAlert').classList.add('hidden');
+      const email = $('portalEmail').value.trim();
+      const password = $('portalPassword').value;
+      const name = $('portalName').value.trim();
+      if (isRegisterPortalMode && !name) { showAuthError('Please enter your full name.'); return; }
+
+      const btn = $('portalAuthBtn');
+      btn.disabled = true;
+      try {
+        const data = await api(isRegisterPortalMode ? '/auth/register' : '/auth/login', {
+          method: 'POST', noRedirect: true,
+          json: isRegisterPortalMode ? { name, email, password } : { email, password }
+        });
+        localStorage.setItem('study_token', data.access_token);
+        localStorage.setItem('study_user', JSON.stringify(data.user));
+        $('headerUserName').innerText = data.user.name || data.user.email;
+        $('authPortalForm').reset();
+        showAppView();
+      } catch (err) {
+        showAuthError(err.message === 'Failed to fetch' ? 'Cannot reach the server. Please try again.' : err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function handlePortalLogout() {
+      clearSession();
+      window.location.replace('/');   // reload wipes all on-screen data of the previous user
+    }
+
+    // ---------- navigation ----------
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'shadow-sm');
+        btn.classList.add('text-slate-600');
+      });
+      const selectedTab = $('tab-' + tabId);
+      const selectedBtn = $('nav-' + tabId);
+      if (selectedTab) selectedTab.classList.add('active');
+      if (selectedBtn) {
+        selectedBtn.classList.remove('text-slate-600');
+        selectedBtn.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'shadow-sm');
+      }
+      if ((tabId === 'tutor' || tabId === 'quiz') && !aiStatusChecked) checkAiStatus();
+    }
+
+    function needSubject() {
+      toast('Please create a subject first (+ New Subject).', 'warn');
+      $('subjectModal').classList.remove('hidden');
+    }
+
+    async function checkAiStatus() {
+      aiStatusChecked = true;
+      ['aiBadge', 'aiBadgeQuiz'].forEach(id => { $(id).className = 'text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold border border-slate-200'; $(id).textContent = '● Checking AI…'; });
+      let cls, text, title = '';
+      try {
+        const r = await api('/tutor/status');
+        if (r.mode === 'gemini' && r.ok) { cls = 'bg-emerald-50 text-emerald-700 border-emerald-200'; text = '● Gemini AI connected'; }
+        else if (r.mode === 'gemini') { cls = 'bg-rose-50 text-rose-700 border-rose-200'; text = '● AI key problem (click to retry)'; title = r.message; }
+        else { cls = 'bg-amber-50 text-amber-700 border-amber-200'; text = '● Offline mode (no AI key)'; title = r.message; }
+        if (!r.ok) toast(r.message, 'error');
+      } catch (e) { cls = 'bg-rose-50 text-rose-700 border-rose-200'; text = '● AI status unavailable'; title = e.message; }
+      ['aiBadge', 'aiBadgeQuiz'].forEach(id => { $(id).className = `text-xs px-3 py-1 rounded-full font-semibold border cursor-pointer ${cls}`; $(id).textContent = text; $(id).title = title; });
+    }
+
+    // ---------- loading data ----------
+    async function loadSubjects(preferId) {
+      subjects = await api('/subjects');
+      const sel = $('subjectSelect');
+      if (!subjects.length) {
+        sel.innerHTML = '<option value="">— none yet —</option>';
+        current = null; topics = []; notes = []; plan = null; progress = null;
+        resetTutor(); resetQuiz(); renderAll();
+        return;
+      }
+      sel.innerHTML = subjects.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+      let id = preferId || Number(localStorage.getItem(selKey())) || subjects[0].id;
+      if (!subjects.find(s => s.id === id)) id = subjects[0].id;
+      sel.value = id;
+      await selectSubject(id);
+    }
+
+    async function selectSubject(id) {
+      current = subjects.find(s => s.id === Number(id)) || null;
+      if (!current) return;
+      try { localStorage.setItem(selKey(), String(current.id)); } catch (e) {}
+      await refreshData();
+      resetTutor(); resetQuiz();
+    }
+
+    function onSubjectChange() {
+      const v = $('subjectSelect').value;
+      if (v) selectSubject(Number(v)).catch(e => toast(e.message, 'error'));
+    }
+
+    async function refreshData() {
+      if (!current) return;
+      const id = current.id;
+      [topics, notes, plan, progress] = await Promise.all([
+        api(`/subjects/${id}/topics`),
+        api(`/subjects/${id}/notes`),
+        api(`/subjects/${id}/plan`).catch(() => null),   // 404 = no plan generated yet
+        api(`/subjects/${id}/progress`)
+      ]);
+      renderAll();
+    }
+
+    function renderAll() {
+      renderHeader(); renderDashboard(); renderSyllabus(); renderPlanner(); renderNotes(); renderQuizTopics();
+    }
+
+    function renderHeader() {
+      setText('headerExamDate', current ? current.exam_date : '—');
+      $('deleteSubjectBtn').classList.toggle('hidden', !current);
+    }
+
+    // ---------- dashboard ----------
+    function renderDashboard() {
+      const empty = t => `<div class="p-6 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">${t}</div>`;
+      if (!current || !progress) {
+        setText('dashSubjectTitle', 'No subject yet'); setText('dashExamDate', '—'); setText('dashDaysLeft', '—'); setText('kpiDays', '—');
+        setText('kpiCoverage', '0%'); setText('kpiMastery', '0%'); setText('kpiStreak', '0 Days');
+        $('dashSessions').innerHTML = empty('Create a subject with <strong>+ New Subject</strong> to get started.');
+        $('dashWeakList').innerHTML = `<div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">No weak topics yet.</div>`;
+        return;
+      }
+      setText('dashSubjectTitle', current.name); setText('dashExamDate', progress.exam_date); setText('dashDaysLeft', progress.days_left);
+      setText('kpiDays', progress.days_left);
+      setText('kpiCoverage', Math.round(progress.coverage_percentage) + '%');
+      setText('kpiMastery', pct(progress.avg_mastery));
+      const st = progress.study_streak_days;
+      setText('kpiStreak', st + (st === 1 ? ' Day' : ' Days'));
+
+      if (!progress.total_topics) {
+        $('dashWeakList').innerHTML = `<div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">Add syllabus topics, then take quizzes to track mastery.</div>`;
+      } else if (!progress.weak_topics.length) {
+        $('dashWeakList').innerHTML = `<div class="p-4 bg-emerald-50 text-emerald-700 text-xs rounded-xl font-semibold">🎉 All topics are above 60% mastery!</div>`;
+      } else {
+        $('dashWeakList').innerHTML = progress.weak_topics.map(t => `
+          <div class="p-3 rounded-xl bg-rose-50 border border-rose-100">
+            <div class="flex items-center justify-between text-xs"><span class="font-semibold text-slate-800">${esc(t.title)}</span><span class="font-bold text-rose-600">${pct(t.mastery)}</span></div>
+            <div class="h-1.5 bg-white rounded-full mt-2 overflow-hidden"><div class="h-full bg-rose-400" style="width:${Math.round((t.mastery || 0) * 100)}%"></div></div>
+          </div>`).join('');
+      }
+
+      const today = localDate();
+      const todays = plan ? plan.sessions.filter(s => s.date === today) : [];
+      if (!plan) $('dashSessions').innerHTML = empty('No study plan yet. Add topics in the Syllabus tab, then open <strong>Study Planner</strong> and generate your schedule.');
+      else if (!todays.length) $('dashSessions').innerHTML = empty('No sessions scheduled for today. 🎉');
+      else $('dashSessions').innerHTML = todays.map(sessionRow).join('');
+    }
+
+    // ---------- subjects ----------
+    async function handleCreateSubject(e) {
+      e.preventDefault();
+      const name = $('subjName').value.trim();
+      const examDate = $('subjExamDate').value;
+      const hours = parseFloat($('subjDailyHours').value);
+      if (examDate < localDate()) { toast('Please choose an exam date in the future.', 'error'); return; }
+      try {
+        const s = await api('/subjects', { method: 'POST', json: { name, exam_date: examDate, daily_hours: hours } });
+        $('subjectModal').classList.add('hidden');
+        $('subjName').value = '';
+        await loadSubjects(s.id);
+        switchTab('syllabus');
+        toast(`Subject "${s.name}" created. Now add your first topic.`);
+      } catch (err) { toast(err.message, 'error'); }
+    }
+
+    async function handleDeleteSubject() {
+      if (!current) return;
+      if (!confirm(`Delete subject "${current.name}" with all its topics, notes, plans and quizzes? This cannot be undone.`)) return;
+      try {
+        await api(`/subjects/${current.id}`, { method: 'DELETE' });
+        toast('Subject deleted.');
+        await loadSubjects();
+      } catch (err) { toast(err.message, 'error'); }
+    }
+
+    // ---------- syllabus / topics ----------
+    function statusBadge(t) {
+      if (!t.mastery) return ['New', 'bg-slate-100 text-slate-600'];
+      if (t.mastery < 0.6) return ['Weak', 'bg-rose-100 text-rose-700'];
+      if (t.mastery < 0.8) return ['Improving', 'bg-amber-100 text-amber-800'];
+      return ['Mastered', 'bg-emerald-100 text-emerald-700'];
+    }
+
+    function renderSyllabus() {
+      const tbody = $('syllabusTableBody');
+      if (!current) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400 text-xs">Create a subject first with <strong>+ New Subject</strong>.</td></tr>`;
+        return;
+      }
+      if (!topics.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400 text-xs">No topics yet for <strong>${esc(current.name)}</strong>.<br><button onclick="openTopicModal()" class="mt-2 text-indigo-600 font-bold hover:underline">+ Add your first topic</button></td></tr>`;
+        return;
+      }
+      tbody.innerHTML = topics.map(t => {
+        const [label, cls] = statusBadge(t);
+        return `<tr class="hover:bg-slate-50/50">
+          <td class="py-4 px-6 font-semibold text-slate-800">${esc(t.title)}</td>
+          <td class="py-4 px-4 text-amber-500 font-bold">${'★'.repeat(t.difficulty)}${'☆'.repeat(5 - t.difficulty)} (${t.difficulty})</td>
+          <td class="py-4 px-4 text-slate-600">${t.est_hours} hrs</td>
+          <td class="py-4 px-4 text-slate-600">${t.weightage}x</td>
+          <td class="py-4 px-4 font-mono text-xs font-semibold text-indigo-600"><span class="bg-indigo-50/60 px-2 py-1 rounded">${t.priority}</span></td>
+          <td class="py-4 px-4"><span class="font-bold text-slate-700">${pct(t.mastery)}</span></td>
+          <td class="py-4 px-4"><span class="px-2.5 py-1 text-xs font-semibold rounded-full uppercase ${cls}">${label}</span></td>
+          <td class="py-4 px-4 text-right"><button onclick="handleDeleteTopic(${t.id})" class="text-xs text-slate-400 hover:text-rose-600" title="Delete topic">🗑</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function openTopicModal() {
+      if (!current) return needSubject();
+      $('topicModal').classList.remove('hidden');
+      $('topicTitle').focus();
+    }
+
+    async function handleAddTopic(e) {
+      e.preventDefault();
+      const payload = {
+        title: $('topicTitle').value.trim(),
+        difficulty: parseInt($('topicDifficulty').value),
+        est_hours: parseFloat($('topicHours').value),
+        weightage: parseFloat($('topicWeight').value)
+      };
+      try {
+        await api(`/subjects/${current.id}/topics`, { method: 'POST', json: payload });
+        $('topicModal').classList.add('hidden');
+        $('topicForm').reset();
+        await refreshData();
+        toast(`Topic "${payload.title}" added. Open Study Planner to (re)generate your schedule.`);
+      } catch (err) { toast(err.message, 'error'); }
+    }
+
+    async function handleDeleteTopic(id) {
+      const t = topics.find(x => x.id === id);
+      if (!confirm(`Delete topic "${t ? t.title : ''}"?`)) return;
+      try { await api(`/subjects/${current.id}/topics/${id}`, { method: 'DELETE' }); await refreshData(); toast('Topic deleted. Regenerate your schedule to update it.', 'warn'); }
+      catch (err) { toast(err.message, 'error'); }
+    }
+
+    // ---------- planner ----------
+    function sessionRow(s) {
+      const done = s.status === 'done', skipped = s.status === 'skipped';
+      const badge = done ? 'bg-emerald-100 text-emerald-800' : skipped ? 'bg-slate-200 text-slate-600' : 'bg-amber-100 text-amber-800';
+      const btns = (done || skipped) ? '' : `
+        <button onclick="handleSession(${s.id}, 'done')" class="text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg">✓ Done</button>
+        <button onclick="handleSession(${s.id}, 'skipped')" class="text-xs font-semibold text-slate-500 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg">Skip</button>`;
+      return `<div class="flex items-center justify-between p-4 rounded-xl border border-slate-200">
+        <div><h4 class="font-semibold text-slate-800 text-sm">${esc(s.topic_title || 'Revision')}</h4><p class="text-xs text-slate-400">${s.minutes} mins</p></div>
+        <div class="flex items-center space-x-2">${btns}<span class="text-xs px-2.5 py-1 rounded-full font-semibold uppercase ${badge}">${esc(s.status)}</span></div>
+      </div>`;
+    }
+
+    function renderPlanner() {
+      const rationale = $('planRationale'), list = $('plannerSessionList');
+      const empty = t => `<div class="p-8 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">${t}</div>`;
+      if (!current) { list.innerHTML = empty('Create a subject first.'); return; }
+      if (!plan) {
+        rationale.innerHTML = '<strong>Study Plan: </strong> Add topics in the Syllabus tab first, then click Regenerate Schedule to calculate day-wise slots.';
+        list.innerHTML = empty('No sessions yet. Click <strong>↻ Regenerate Schedule</strong> once you have added topics.');
+        return;
+      }
+      rationale.innerHTML = '<strong>Plan: </strong>' + esc(plan.rationale || '');
+      const byDate = {};
+      plan.sessions.forEach(s => { (byDate[s.date] = byDate[s.date] || []).push(s); });
+      const today = localDate();
+      list.innerHTML = Object.keys(byDate).sort().map(d => `
+        <div class="space-y-2">
+          <div class="text-xs font-bold ${d === today ? 'text-indigo-700' : 'text-slate-500'} uppercase tracking-wider pt-2">${d}${d === today ? ' · Today' : ''}</div>
+          ${byDate[d].map(sessionRow).join('')}
+        </div>`).join('');
+    }
+
+    async function handleRegeneratePlan() {
+      if (!current) return needSubject();
+      if (!topics.length) { toast('Add at least one topic first.', 'warn'); switchTab('syllabus'); return; }
+      try {
+        await api(`/subjects/${current.id}/plan/generate`, { method: 'POST', json: { session_length_minutes: 60, start_date: localDate() } });
+        await refreshData();
+        toast('Schedule generated from your topics and available hours.');
+      } catch (err) { toast(err.message, 'error'); }
+    }
+
+    async function handleSession(id, status) {
+      try { await api(`/sessions/${id}`, { method: 'PATCH', json: { status } }); await refreshData(); }
+      catch (err) { toast(err.message, 'error'); }
+    }
+
+    // ---------- notes ----------
+    function renderNotes() {
+      $('notesCount').innerText = notes.length;
+      const list = $('notesList');
+      if (!current) { list.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">Create a subject first.</div>'; return; }
+      if (!notes.length) { list.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">No notes uploaded yet.</div>'; return; }
+      list.innerHTML = notes.map(n => {
+        const ok = n.status === 'processed';
+        return `<div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50">
+          <div class="flex items-center space-x-3">
+            <span class="px-2 py-1 bg-indigo-100 text-indigo-700 font-bold text-xs rounded-lg uppercase">${esc(n.file_type)}</span>
+            <div><h4 class="font-semibold text-slate-800 text-sm">${esc(n.filename)}</h4>
+            <p class="text-xs text-slate-400">${ok ? `Indexed ${n.chunks} text chunk${n.chunks === 1 ? '' : 's'} · ready for AI Tutor` : 'No readable text found (scanned/image-only file?)'}</p></div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="text-xs font-semibold px-3 py-1 rounded-full border ${ok ? 'text-emerald-700 bg-emerald-50 border-emerald-100' : 'text-rose-700 bg-rose-50 border-rose-100'}">${ok ? '● Processed' : '● Error'}</span>
+            <button onclick="handleDeleteNote(${n.id})" class="text-xs text-slate-400 hover:text-rose-600" title="Delete">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function handleUploadNote() {
+      if (!current) return needSubject();
+      const f = $('noteFileInput').files[0];
+      if (!f) { toast('Please choose a PDF, DOCX or TXT file first.', 'warn'); return; }
+      const btn = $('uploadBtn');
+      btn.disabled = true; btn.textContent = 'Uploading & indexing… (large files can take a minute)';
+      try {
+        const fd = new FormData();
+        fd.append('file', f);
+        const n = await api(`/subjects/${current.id}/notes`, { method: 'POST', body: fd });
+        $('noteFileInput').value = '';
+        await refreshData();
+        if (n.status === 'error') toast('Uploaded, but no readable text was found. Scanned PDFs need OCR first.', 'error');
+        else toast(`"${n.filename}" indexed (${n.chunks} chunks). You can now ask the AI Tutor about it.`);
+      } catch (err) { toast(err.message, 'error'); }
+      finally { btn.disabled = false; btn.textContent = 'Upload & Index into Vector Store'; }
+    }
+
+    async function handleDeleteNote(id) {
+      if (!confirm('Delete this note and its indexed text?')) return;
+      try { await api(`/subjects/${current.id}/notes/${id}`, { method: 'DELETE' }); await refreshData(); }
+      catch (err) { toast(err.message, 'error'); }
+    }
+
+    // ---------- tutor ----------
+    function botBubble(html) {
+      const row = document.createElement('div');
+      row.className = 'flex items-start space-x-3';
+      row.innerHTML = `<div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">AI</div>
+        <div class="bg-slate-100 text-slate-800 p-4 rounded-2xl rounded-bl-none text-sm max-w-2xl space-y-2 whitespace-pre-wrap break-words">${html}</div>`;
+      $('tutorMessages').appendChild(row);
+      $('tutorMessages').scrollTop = $('tutorMessages').scrollHeight;
+      return row.lastElementChild;
+    }
+
+    function resetTutor() {
+      const name = current ? esc(current.name) : 'your subject';
+      $('tutorMessages').innerHTML = '';
+      botBubble(`Hello! I am your AI Tutor for <strong>${name}</strong>. Ask me anything about your uploaded notes and I will answer from them, with the source shown.`);
+    }
+
+    async function handleSendTutor(e) {
+      e.preventDefault();
+      if (!current) return needSubject();
+      const q = $('tutorInput').value.trim();
+      if (!q) return;
+      $('tutorInput').value = '';
+      const me = document.createElement('div');
+      me.className = 'flex items-start justify-end space-x-3';
+      me.innerHTML = `<div class="bg-indigo-600 text-white p-4 rounded-2xl rounded-br-none text-sm max-w-xl whitespace-pre-wrap break-words">${esc(q)}</div><div class="w-8 h-8 rounded-lg bg-slate-800 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">You</div>`;
+      $('tutorMessages').appendChild(me);
+      const bubble = botBubble('<em class="text-slate-400">Searching your notes…</em>');
+      try {
+        const r = await api('/tutor/ask', { method: 'POST', json: { subject_id: current.id, question: q } });
+        let html = fmt(r.answer);
+        if (r.found_in_notes && r.sources && r.sources.length) {
+          html += `<details class="mt-2 text-xs"><summary class="cursor-pointer font-semibold text-indigo-700">Sources (${r.sources.length})</summary>` +
+            r.sources.map(s => `<div class="mt-2 p-2 bg-white rounded-lg border border-slate-200"><strong>${esc(s.filename)}</strong>${s.page_number ? ` (page ${s.page_number})` : ''}<div class="text-slate-500 mt-1">“${esc(s.snippet)}”</div></div>`).join('') + '</details>';
+        }
+        bubble.innerHTML = html;
+      } catch (err) {
+        bubble.innerHTML = `<span class="text-rose-600 font-semibold">⚠ ${esc(err.message)}</span>`;
+      }
+      $('tutorMessages').scrollTop = $('tutorMessages').scrollHeight;
+    }
+
+    // ---------- quiz ----------
+    function renderQuizTopics() {
+      const sel = $('quizTopic');
+      sel.innerHTML = topics.length ? topics.map(t => `<option value="${t.id}">${esc(t.title)} (mastery ${pct(t.mastery)})</option>`).join('') : '<option value="">— add topics first —</option>';
+    }
+
+    function resetQuiz() {
+      currentQuiz = null;
+      $('quizArea').innerHTML = '<div class="p-8 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">Choose a topic above and click <strong>Generate Quiz</strong>.</div>';
+    }
+
+    function openQuizFor(topicId) { switchTab('quiz'); if (topicId) $('quizTopic').value = topicId; }
+
+    async function handleGenerateQuiz() {
+      if (!current) return needSubject();
+      const id = $('quizTopic').value;
+      if (!id) { toast('Add a topic first (Syllabus tab).', 'warn'); return; }
+      const btn = $('genQuizBtn');
+      btn.disabled = true; btn.textContent = 'Generating…';
+      $('quizArea').innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">Reading your notes and writing questions…</div>';
+      try {
+        currentQuiz = await api(`/topics/${id}/quiz`, { method: 'POST' });
+        renderQuiz();
+      } catch (err) {
+        resetQuiz();
+        toast(err.message, 'error');
+      } finally { btn.disabled = false; btn.textContent = 'Generate Quiz'; }
+    }
+
+    function renderQuiz() {
+      const q = currentQuiz;
+      const letters = 'ABCDEFGH';
+      $('quizArea').innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+          <div><h3 class="font-bold text-slate-800 text-base">Quiz: ${esc(q.topic_title)}</h3><p class="text-xs text-slate-400">Difficulty ${q.difficulty}/5 · ${q.questions.length} questions</p></div>
+          <span class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-100">Topic Quiz</span>
+        </div>
+        <div class="space-y-4" id="quizQuestions">
+          ${q.questions.map((qq, i) => `
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-3" id="qbox_${qq.id}">
+              <span class="text-xs font-bold text-indigo-600">Question ${i + 1} (${qq.type === 'mcq' ? 'MCQ' : 'Short Answer'})</span>
+              <p class="font-semibold text-sm text-slate-800">${esc(qq.question)}</p>
+              ${qq.type === 'mcq'
+                ? `<div class="space-y-2 pl-2 text-sm">${(qq.options || []).map((o, k) => `<label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="q_${qq.id}" value="${esc(o)}" class="text-indigo-600"><span>${letters[k]}) ${esc(o)}</span></label>`).join('')}</div>`
+                : `<textarea id="a_${qq.id}" rows="2" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>`}
+              <div id="fb_${qq.id}"></div>
+            </div>`).join('')}
+        </div>
+        <div class="flex justify-end pt-4"><button id="submitQuizBtn" onclick="handleSubmitQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold text-xs shadow-md">Submit Answers & Update Mastery</button></div>
+        <div id="quizResultBox" class="hidden mt-4"></div>`;
+    }
+
+    async function handleSubmitQuiz() {
+      const answers = currentQuiz.questions.map(qq => {
+        let ans = '';
+        if (qq.type === 'mcq') { const r = document.querySelector(`input[name="q_${qq.id}"]:checked`); ans = r ? r.value : ''; }
+        else ans = ($(`a_${qq.id}`).value || '').trim();
+        return { question_id: qq.id, answer: ans };
+      });
+      if (answers.every(a => !a.answer)) { toast('Please answer at least one question.', 'warn'); return; }
+      const oldMastery = (topics.find(t => t.id === currentQuiz.topic_id) || {}).mastery || 0;
+      const btn = $('submitQuizBtn'); btn.disabled = true;
+      try {
+        const r = await api(`/quizzes/${currentQuiz.id}/submit`, { method: 'POST', json: { answers } });
+        r.breakdown.forEach(b => {
+          const fb = $(`fb_${b.question_id}`);
+          if (!fb) return;
+          fb.innerHTML = `<div class="text-xs p-3 rounded-lg ${b.is_correct ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-rose-50 text-rose-800 border border-rose-100'}">
+            <strong>${b.is_correct ? '✓ Correct' : '✗ Not quite'}</strong>${b.is_correct ? '' : `<div class="mt-1">Correct answer: <strong>${esc(b.correct_answer)}</strong></div>`}
+            ${b.explanation ? `<div class="mt-1 text-slate-600">${esc(b.explanation)}</div>` : ''}</div>`;
+        });
+        const box = $('quizResultBox');
+        box.className = 'mt-4 p-4 rounded-2xl bg-indigo-50 border border-indigo-100 space-y-2';
+        box.innerHTML = `<div class="flex items-center justify-between"><h4 class="font-bold text-indigo-950 text-sm">Quiz Evaluation Completed</h4><span class="text-xs font-bold text-indigo-600 bg-white px-2.5 py-1 rounded-lg">Score: ${r.score}% (${r.correct_count}/${r.total_questions})</span></div>
+          <p class="text-xs text-indigo-800">Mastery updated: 0.7 × ${oldMastery.toFixed(2)} + 0.3 × ${r.accuracy.toFixed(2)} = <strong>${r.new_mastery.toFixed(2)}</strong> (${pct(r.new_mastery)}).</p>
+          <p class="text-xs ${r.is_weak ? 'text-rose-600' : 'text-emerald-600'} font-semibold">${r.is_weak ? 'This topic is still weak (below 60%). Take another quiz after revising.' : 'Great - this topic is above 60% mastery.'}</p>
+          <button onclick="handleGenerateQuiz()" class="text-xs font-semibold text-indigo-700 underline">Generate a new quiz on this topic</button>`;
+        document.querySelectorAll('#quizQuestions input, #quizQuestions textarea').forEach(el => el.disabled = true);
+        btn.classList.add('hidden');
+        await refreshData();   // dashboard, weak topics and priorities update
+      } catch (err) { toast(err.message, 'error'); btn.disabled = false; }
+    }
+  </script>
+</body>
+</html>
